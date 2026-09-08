@@ -1,11 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
-export default function ResetPasswordPage() {
-    const searchParams = useSearchParams()
+function ResetPasswordContent() {
     const [status, setStatus] = useState<'loading' | 'ready' | 'success' | 'error'>('loading')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
@@ -14,7 +12,6 @@ export default function ResetPasswordPage() {
 
     useEffect(() => {
         async function handleToken() {
-            // Récupère le hash fragment (#access_token=xxx)
             const hash = window.location.hash
             console.log('🔗 Hash :', hash)
 
@@ -77,7 +74,6 @@ export default function ResetPasswordPage() {
             setIsLoading(false)
         } else {
             setStatus('success')
-            // Redirige vers l'app après 2 secondes
             setTimeout(() => {
                 window.location.href = 'wax://login'
             }, 2000)
@@ -88,31 +84,23 @@ export default function ResetPasswordPage() {
         <main style={styles.container}>
             <div style={styles.card}>
 
-                {/* Logo */}
                 <h1 style={styles.logo}>WAX</h1>
 
-                {/* Loading */}
                 {status === 'loading' && (
                     <div style={styles.center}>
-                        <div style={styles.spinner} />
                         <p style={styles.muted}>Verifying your reset link...</p>
                     </div>
                 )}
 
-                {/* Error */}
                 {status === 'error' && (
                     <div style={styles.center}>
                         <p style={styles.errorTitle}>Link expired</p>
                         <p style={styles.muted}>
                             This reset link is invalid or has expired.
                         </p>
-                        <a href="wax://forgot-password" style={styles.button}>
-                            Request a new link
-                        </a>
                     </div>
                 )}
 
-                {/* Success */}
                 {status === 'success' && (
                     <div style={styles.center}>
                         <p style={styles.successTitle}>Password updated!</p>
@@ -120,7 +108,6 @@ export default function ResetPasswordPage() {
                     </div>
                 )}
 
-                {/* Form */}
                 {status === 'ready' && (
                     <>
                         <p style={styles.subtitle}>Choose a new password</p>
@@ -176,6 +163,21 @@ export default function ResetPasswordPage() {
     )
 }
 
+export default function ResetPasswordPage() {
+    return (
+        <Suspense fallback={
+            <main style={styles.container}>
+                <div style={styles.card}>
+                    <h1 style={styles.logo}>WAX</h1>
+                    <p style={styles.muted}>Loading...</p>
+                </div>
+            </main>
+        }>
+            <ResetPasswordContent />
+        </Suspense>
+    )
+}
+
 const styles: Record<string, React.CSSProperties> = {
     container: {
         display: 'flex',
@@ -202,6 +204,7 @@ const styles: Record<string, React.CSSProperties> = {
         fontWeight: '900',
         color: '#F5A623',
         letterSpacing: '8px',
+        margin: 0,
     },
     subtitle: {
         fontSize: '16px',
@@ -250,28 +253,24 @@ const styles: Record<string, React.CSSProperties> = {
         color: '#888888',
         fontSize: '14px',
         textAlign: 'center',
+        margin: 0,
     },
     error: {
         color: '#FF5555',
         fontSize: '13px',
         textAlign: 'center',
+        margin: 0,
     },
     errorTitle: {
         fontSize: '24px',
         fontWeight: '800',
         color: '#FFFFFF',
+        margin: 0,
     },
     successTitle: {
         fontSize: '24px',
         fontWeight: '800',
         color: '#FFFFFF',
-    },
-    spinner: {
-        width: '32px',
-        height: '32px',
-        border: '3px solid #2A2A2A',
-        borderTop: '3px solid #F5A623',
-        borderRadius: '50%',
-        animation: 'spin 1s linear infinite',
+        margin: 0,
     },
 }
